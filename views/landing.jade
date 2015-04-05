@@ -1,0 +1,43 @@
+extends layout
+
+block content
+	h1.textcenter Landing Page
+	.pure-g
+		.pure-u-1-2
+			.pure-control-group
+				a.pure-button.pure-button-primary(href="/createqa") Create New QA
+			table.pure-table
+				thead
+					tr
+						th #
+						th Name
+						th Main Image
+						th Owner
+
+				tbody
+					- var count = 0;
+					each doc in qa.rows
+						tr
+							td=(++count)
+							td
+								a(href='/discover/qa/'+doc.value.name)=doc.value.name
+							td=doc.value.apps
+							td=doc.value.owner
+		.pure-u-1-2
+			.pure-control-group
+				a.pure-button.pure-button-primary(href="/createimage") Add New Image
+			table.pure-table
+				thead
+					tr
+						th #
+						th Name
+						th Owner
+
+				tbody
+					- var count = 0;
+					each doc in app.rows
+						tr
+							td=(++count)
+							td
+								a(href='/discover/image/'+doc.value.name)=doc.value.name
+							td=doc.value.owner

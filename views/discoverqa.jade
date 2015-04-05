@@ -1,0 +1,76 @@
+extends layout
+
+block assets
+	style
+		| #sshlink {
+		|	letter-spacing: normal;
+		|	margin-left: 10px;
+		|	font-weight: bold;
+		|	line-height: 23px;
+		| }
+
+block content
+	h1.textcenter=name
+	a.bookmargin(href='/landing') Go Back
+	.pure-g.fullhw
+		.pure-u-1-2.bookmargin
+			.pure-form.pure-form-stacked
+				h2 Details of this Environment
+				.pure-control-group
+					label Name
+					p=name
+				.pure-control-group
+					- var appString = JSON.stringify(app);
+					textarea.hidden=appString
+				.pure-control-group
+					label Description
+					p=description
+				.pure-control-group
+					label TTL Days
+					p=ttl
+				.pure-control-group
+					label SSH to the container
+					.pure-g 
+						select(onchange='sshChange(this)')
+							each server in serverList
+								option=server
+						a#sshlink.pure-button.pure-button-primary(href='http://terminal-name-qaname.qa.myntra.com' target='_blank') SSH
+				.pure-control-group
+					button.pure-button.pure-button-error(onclick='deleteQA(this)') Delete
+
+		.pure-u-1-2.marginline
+			include uml
+
+	script="var qaname = '" + name +"', port = " + port +", _rev = '" + _rev + "';"
+	script
+		| function deleteQA() {
+		|	document.querySelector('#processing').classList.remove('hidden');
+		|	$.post('delete/' + qaname, {port : port, _rev : _rev}, function(res){
+		|		if(res.redirect) {
+		|			window.location = res.redirect;
+		|		} else alert(res);
+		|	});
+		| }
+		| function renderUml() {
+		|	var uml = [];
+		|	var app = JSON.parse(document.querySelector('textarea.hidden').value);
+		|	if(!app.image) return;
+		|	uml.push('['+app.image+']'); 
+		|	doSome(app);
+		|	
+		|	function doSome(app){
+		|		if(!app.image) return;
+		|		app.dependency && app.dependency.forEach(function(dep){
+		|			if(dep.image) uml.push('['+app.image+']->['+dep.image+']');
+		|			doSome(dep);
+		|		});
+		|	};
+		|	nomnoml.parseAndRender(uml.join('\n') || '.');
+		| }
+		| function sshChange(select){
+		|	document.querySelector('#sshlink').href = 'http://terminal-' + qaname + '-' + select.value + '.qa.myntra.com';
+		| }
+		| window.onload = function(){
+		|	renderUml();
+		|	sshChange(document.querySelector('select'));
+		| };

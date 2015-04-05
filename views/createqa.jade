@@ -1,0 +1,110 @@
+extends layout
+
+block assets
+	style
+		| .appblock > .appblock {
+		|	margin-left : 20px;
+		| }
+		| .pure-button {
+		|	margin-top : 20px;
+		| }
+
+block content
+	h1.textcenter Create New QA Environment
+	a.bookmargin(href='/landing') Go Back
+	.pure-g.fullhw
+		.pure-u-1-2.bookmargin
+			.pure-form.pure-form-stacked
+				h2 Enter the QA Details
+				.pure-control-group
+					label Name
+					input#qaname(placeholder='Name for your QA')
+				.pure-control-group
+					label Application Name : FQDN : Build No
+					.appblock
+						.pure-g
+							button.hidden(onclick='remD(this)' title='Remove') -
+							input.aname(placeholder='Type you app name')
+							input.hidden.fqdn(placeholder='FQDN of this dependency')
+							input.buildno(placeholder='GA Repo build No.')
+							button(onclick='addD(this)' title='Add dependency') +
+				.pure-control-group
+					label Description
+					textarea#qadesc
+				.pure-control-group
+					label TTL Days
+					input#ttl(placeholder='Delete this QA after how many days')
+				.pure-control-group
+					button.pure-button.pure-button-primary(onclick='submit(this)') Create
+
+		.pure-u-1-2.marginline
+			include uml
+
+	script(src="/js/autocomplete.js")
+	script!="var imageMap = " + JSON.stringify(images) + ";"
+	script
+		| var imageList = Object.keys(imageMap);
+		| autoComplete(document.querySelector('.appblock input.aname'), imageList);
+		| var appblock = document.querySelector('.appblock').cloneNode(true);
+		| document.querySelector('.appblock').addEventListener('input', _.debounce(renderUml, 300));
+		| function addD(button) {
+		|	var newNode = appblock.cloneNode(true);
+		|	newNode.querySelector(".hidden").classList.remove("hidden");// remove the hidden from Remove button
+		|	newNode.querySelector(".hidden").classList.remove("hidden");// remove hidden from fqdn
+		|	button.parentElement.parentElement.appendChild(newNode);
+		|	renderUml();
+		|	autoComplete(newNode.querySelector('input.aname'), imageList);
+		| }
+		| function remD(button) {
+		|	button.parentElement.parentElement.remove();
+		|	renderUml();
+		| }
+		| function renderUml() {
+		|	var uml = [];
+		|	var app = getApp();
+		|	if(!app.image) return;
+		|	uml.push('['+app.image+']'); 
+		|	doSome(app);
+		|	
+		|	function doSome(app){
+		|		if(!app.image) return;
+		|		app.dependency.forEach(function(dep){
+		|			if(dep.image) uml.push('['+app.image+']->['+dep.image+']');
+		|			doSome(dep);
+		|		});
+		|	};
+		|	nomnoml.parseAndRender(uml.join('\n') || '.');
+		| }
+		| function submit() {
+		|	var data = {
+		|			name : document.querySelector('#qaname').value,
+		|			app : getApp(),
+		|			description : document.querySelector('#qadesc').value,
+		|			ttl : document.querySelector('#ttl').value
+		|	};
+		|	document.querySelector('#processing').classList.remove('hidden');
+		|	$.post('', data, function(res){
+		|		if(res.redirect) {
+		|			window.location = res.redirect;
+		|		} else alert(res);
+		|	});
+		| }
+		| function getApp(appblock) {
+		|	appblock = appblock || document.querySelector('.appblock');
+		|	var qaname = document.querySelector('#qaname').value;
+		|	var app = {
+		|		name : qaname + appblock.querySelector('.pure-g .aname').value,
+		|		image : appblock.querySelector('.pure-g .aname').value,
+		|		port : imageMap[appblock.querySelector('.pure-g .aname').value],
+		|		fqdn : appblock.querySelector('.pure-g .fqdn').value,
+		|		build : appblock.querySelector('.pure-g .buildno').value,
+		|		dependency : []
+		|	};
+		|	var subblocks = appblock.childNodes;
+		|	[].forEach.call(subblocks, function(capp){
+		|		if(capp.classList.contains('appblock')){
+		|			app.dependency.push(getApp(capp));
+		|		}
+		|	});
+		|	return app;
+		| }

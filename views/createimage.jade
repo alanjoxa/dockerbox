@@ -1,0 +1,75 @@
+extends layout
+
+block assets
+	style
+		| .appblock > .appblock {
+		|	margin-left : 20px;
+		| }
+		| .pure-button {
+		|	margin-top : 20px;
+		| }
+		| input {
+		|	width: 100%;
+		| }
+
+block content
+	- var action = name || 'Add a New Image';
+	h1.textcenter=action 
+	a.bookmargin(href='/landing') Go Back
+	.pure-g.fullhw
+		.pure-u-1-2.bookmargin
+			.pure-form.pure-form-stacked
+				h2 Enter the Details of the Image
+				.pure-control-group
+					label Name
+					input#appname(placeholder='Name for your Image' value=name disabled=!!name)
+				.pure-control-group
+					label Port No.
+					input#appport(placeholder='Port which the app will be listening on' value=port)
+				.pure-control-group
+					label Default Build No
+					input#appbuild(placeholder='Default Build No of a stable build in GA repo' value=default_build)
+				.pure-control-group
+					label Description
+					textarea#appdesc=description
+				.pure-control-group
+					unless processing
+						- var action = name ? 'Update' : 'Add';
+						button.pure-button.pure-button-primary(onclick='submit(this)')=action
+						if name
+							button.pure-button.pure-button-error(onclick='deleteImage(this)') Delete
+					else
+						button.pure-button.pure-button-primary Image Build progressing....
+
+		.pure-u-1-2.marginline
+			include codemirror
+
+	script="var _id='" + (_id || '') + "',_rev='" + (_rev || '') + "';"
+	script
+		| function deleteImage() {
+		|	document.querySelector('#processing').classList.remove('hidden');
+		|	$.post('delete/' + _id, {_rev:_rev}, function(res){
+		|		if(res.redirect) {
+		|			window.location = res.redirect;
+		|		} else alert(res);
+		|	});
+		| }
+		| function submit() {
+		|	var data = {
+		|			name : document.querySelector('#appname').value,
+		|			port : document.querySelector('#appport').value,
+		|			default_build : document.querySelector('#appbuild').value,
+		|			description : document.querySelector('#appdesc').value,
+		|			dockerfile : editor.getValue()
+		|	};
+		|	if(_rev) { // Update
+		|		data._rev = _rev;
+		|		data._id = _id;
+		|	}
+		|	document.querySelector('#processing').classList.remove('hidden');
+		|	$.post('', data, function(res){
+		|		if(res.redirect) {
+		|			window.location = res.redirect;
+		|		} else alert(res);
+		|	});
+		| }

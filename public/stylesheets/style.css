@@ -1,0 +1,75 @@
+body {
+  padding: 10px;
+  font: 14px 'Open Sans Condensed', sans-serif, Helvetica, Arial;
+}
+
+.pure-g [class *="pure-u"],
+.pure-g {
+  font-family: 'Open Sans Condensed', sans-serif;
+}
+
+.pure-button-error {
+	background: rgb(202, 60, 60); /* this is a maroon */
+	color: #FFF;
+	font-weight: bold;
+	margin: 10px auto;
+	width: 200px;
+	display: block;
+}
+
+div {
+	box-sizing:border-box;
+}
+a {
+  color: #00B7FF;
+}
+
+input,
+textarea,
+.pure-form textarea,
+.pure-form input:not([type]) {
+	border: 0;
+	box-shadow: -1px 0px 0px 0px gray;
+	border-radius: 0;
+}
+
+label {
+	font-weight:bold;
+}
+
+.textcenter {
+	text-align :center;
+}
+
+.marginline {
+	border-left: 1px solid gray;
+	margin-left: -1px;
+}
+
+.fullhw {
+	position: absolute;
+	height: 80%;
+	width:99%;
+}
+
+.bookmargin {
+	padding-left: 60px;
+}
+
+
+#processing {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 9999999;
+	font-size: 40px;
+	color: #FFF;
+	background: #000;
+	right: 0;
+	bottom: 0;
+	opacity: 0.8;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 200px;
+	text-shadow: 0 0 16px #FFF;
+}
