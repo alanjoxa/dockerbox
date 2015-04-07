@@ -1,4 +1,5 @@
 var exec = require('child_process').exec,
+	spawn = require('child_process').spawn,
 	fs = require('fs'),
 	tempFolder = __dirname + '/tempfiles/composefolders/';
 var Docker = require('dockerode');
@@ -15,11 +16,17 @@ module.exports = {
 			var ymlString = CreateYml(serverStructure, portConfig.httpPort);
 		    fs.writeFileSync(tempFolder + name + '/docker-compose.yml', ymlString);
 			
-			exec('COMPOSE_FILE=' + tempFolder + name + '/docker-compose.yml' + ' docker-compose up -d', function(err, stdout, stderr) {
-	    		if(err||stdout||stderr) console.log(err, stdout, stderr);
-	    		if(err) return;
-	    		console.log(stdout, stderr);
-	    	});
+			var compose = spawn('docker-compose', ['up', '-d'], {"cwd":tempFolder + name });
+
+			compose.stdout.on('data', function(data) { 
+				console.log(data ? data.toString('utf8') : ''); 
+			});
+			compose.stdout.on('end', function(data) {
+				console.log(data ? data.toString('utf8') : '');
+			});
+			compose.on('exit', function(code) {
+				console.log('Exit with CODE: ' + code);
+			});
 		});
 	},
 	stop: function(name) {

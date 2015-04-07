@@ -1,5 +1,6 @@
 
 var exec = require('child_process').exec,
+	spawn = require('child_process').spawn,
 	fs = require('fs'),
 	tempFolder = __dirname + '/tempfiles/dockerfiles/';
 
@@ -11,10 +12,17 @@ module.exports = {
 			if(err) return;
 	    
 	    	fs.writeFileSync(tempFolder + name + '/Dockerfile', dockerfileString);
-	    	exec('docker build -t ' + name + ' ' + tempFolder + name, function(err, stdout, stderr) {
-	    		if(err||stdout||stderr) console.log(err, stdout, stderr);
-	    		if(err) return;
-	    	});	
+	    	var build = spawn('docker', ['build', '-t', name , tempFolder + name]);	
+
+			build.stdout.on('data', function(data) { 
+				console.log(data ? data.toString('utf8') : ''); 
+			});
+			build.stdout.on('end', function(data) {
+				console.log(data ? data.toString('utf8') : '');
+			});
+			build.on('exit', function(code) {
+				console.log('Exit with CODE: ' + code);
+			});
 		});
 	},
 	
