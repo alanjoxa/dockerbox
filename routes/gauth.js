@@ -15,7 +15,7 @@ var oauth2Client =
     secrets.web.client_secret,
     secrets.web.redirect_uris[0]);
 
-/* GET home page. */
+/* GET login page. */
 router.get('/', function(req, res) {
   var tokens = req.session.tokens;
   var title = '';
@@ -32,6 +32,7 @@ router.post('/login', function(req, res) {
   var options = {
     access_type: 'offline',
     scope: [
+      'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email'
     ].join(' ')
   };
@@ -50,12 +51,36 @@ router.get('/oauth2callback', function(req, res) {
 
       req.session.tokens = tokens;
       oauth2Client.setCredentials(tokens);
-      res.redirect('/');
+      res.redirect(req.session.custom_target || '/landing');
     });
   }
   else {
     res.redirect('/');
   }
 });
+
+/*
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    function(req, res) {
+      if(appAuthenticate(req))
+        if(req.session.custom_target)
+          res.redirect(req.session.custom_target);
+        else
+          res.redirect('/list');
+      else {
+        logout(req, true);
+        res.redirect('/unauthorized');
+      }
+    });
+
+router.get('/*', ensureAuthenticated);
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  req.session.custom_target = req.url;
+  res.redirect('/login');
+}
+*/
 
 module.exports = router;

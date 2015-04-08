@@ -2,3 +2,4 @@ node_modules
 *.log
 tempfiles
 docker/tempfiles
+secrets.json
